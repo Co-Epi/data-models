@@ -13,7 +13,7 @@
 					</xs:annotation>
 					<xs:complexType>
 						<xs:all>
-							<xs:element name="TransmissibleDisease">
+							<xs:element name="TransmissibleDisease" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="DiseaseName" type="xs:string" use="required"/>
 									<xs:attribute name="MinimumIncubationPeriod" type="xs:dayTimeDuration">
@@ -24,6 +24,38 @@
 									<xs:attribute name="MaximumIncubationPeriod" type="xs:dayTimeDuration">
 										<xs:annotation>
 											<xs:documentation>The sensible maximum (eg. 2 standard deviation) number days between infectious exposure and onset of clinical symptoms</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="HealthRegion" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Configuration to allow display and linking to trusted health information for a specific geographic region</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:attribute name="RegionCountry" use="required">
+										<xs:annotation>
+											<xs:documentation>ISO Country code for the configured region</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="RegionState" use="required">
+										<xs:annotation>
+											<xs:documentation>Code for the state being configured</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="PublicPhoneNumber" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Phone number to be called by members of the public who have enquiries around COVID-19</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="PublicWebsiteURL" type="xs:anyURI">
+										<xs:annotation>
+											<xs:documentation>Link to the main entry point for the public facing information by the local health department</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
+									<xs:attribute name="PublicWebsiteName" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Name of the main entry point website</xs:documentation>
 										</xs:annotation>
 									</xs:attribute>
 								</xs:complexType>
@@ -45,6 +77,16 @@
 								</xs:restriction>
 							</xs:simpleType>
 						</xs:attribute>
+						<xs:attribute name="CoEpiURL" type="xs:anyURI">
+							<xs:annotation>
+								<xs:documentation>Link to the master homepage for CoEpi</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="WorldHealthOrganisationURL">
+							<xs:annotation>
+								<xs:documentation>Link to the main entry point for the public facing information by the WHO</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="Subscription" minOccurs="0">
@@ -53,12 +95,20 @@
 					</xs:annotation>
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="Request" type="epi:ApproximateLocationAndTimeType" minOccurs="0">
+							<xs:element name="Request" minOccurs="0">
 								<xs:annotation>
 									<xs:documentation>A single location and time band subscription request</xs:documentation>
 								</xs:annotation>
+								<xs:complexType>
+									<xs:complexContent>
+										<xs:extension base="epi:ApproximateLocationAndTimeType"/>
+									</xs:complexContent>
+								</xs:complexType>
 							</xs:element>
 							<xs:element name="Response" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Response from server regarding a subscription request</xs:documentation>
+								</xs:annotation>
 								<xs:complexType>
 									<xs:choice>
 										<xs:element name="Success">
@@ -94,6 +144,11 @@
 										</xs:element>
 									</xs:choice>
 								</xs:complexType>
+							</xs:element>
+							<xs:element name="ClientBluetoothIDs" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>A hashed hash of all BLE identifiers that belong to the person requesting notifications. Used to minimise the number of exposure records sent to the client, and prevent phishing for data by malicious clients.</xs:documentation>
+								</xs:annotation>
 							</xs:element>
 						</xs:sequence>
 						<xs:attribute name="StartInterval" type="xs:dateTime" use="required"/>
