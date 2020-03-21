@@ -8,7 +8,7 @@ Request:
 Response: just a confirmation code or error message
 
 Server assembles all exposure records for each datestamp and (optionally, as we scale) shards them by geohash
-- each BLE Proximity Event UUIDs is truncated to include only the first 64 bits of the version-4 UUIDs
+- each BLE Proximity Event UUIDs is truncated to include only the first 64 bits of the version-4 UUIDs in Exposure Check
 
 ## Exposure Check (GET)
 - All Exposure Records (with shortened UUIDs) for a given date (and optionally geohash)
