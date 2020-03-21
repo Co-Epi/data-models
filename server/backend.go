@@ -15,8 +15,8 @@ type Backend struct {
 
 // Contact represents a BLE pairing between 2 devices
 type Contact struct {
-	ContactID string // this is the hash of a pair of BLE ids
-	Date      string // this is when the pair came into contact, used to set TTLs
+	UUID string // this is the hash of a pair of BLE ids
+	Date string // this is when the pair came into contact, used to set TTLs
 }
 
 // ExposureAndSymptoms payload is sent by client to /exposureandsymptoms when user reports symptoms
@@ -30,7 +30,7 @@ type ExposureCheck struct {
 	Contacts []Contact
 }
 
-// TableContacts stores the mapping between contactIDs and symptomHash.
+// TableContacts stores the mapping between UUIDs and symptomHash.
 const TableContacts = "contacts"
 
 // TableSymptoms stores the mapping between symptomHash and symptoms.   The content of the symptoms string is a JSON document that clients need to power the UI but the server does not need to process it
@@ -67,7 +67,7 @@ func (backend *Backend) processExposureAndSymptoms(payload *ExposureAndSymptoms)
 	for _, contact := range payload.Contacts {
 		mut := bigtable.NewMutation()
 		mut.Set("symptoms", contact.Date, bigtable.Now(), symptomsHash)
-		err = contactsTable.Apply(context.Background(), contact.ContactID, mut)
+		err = contactsTable.Apply(context.Background(), contact.UUID, mut)
 		if err != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func (backend *Backend) processExposureCheck(payload *ExposureCheck) (symptomsLi
 	// store one cell per observation
 	symptomsHashes := make([]string, 0)
 	for _, contact := range payload.Contacts {
-		rr := bigtable.PrefixRange(contact.ContactID)
+		rr := bigtable.PrefixRange(contact.UUID)
 		err := tableContacts.ReadRows(context.Background(), rr, func(r bigtable.Row) bool {
 			for k, xv := range r {
 				switch k {
