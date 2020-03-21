@@ -4,6 +4,7 @@ Request:
 - Datestamp
   - Geohash(es) covering the geo-location of some/all exposure records
   - Exposure Record (List of all BLE Proximity Event UUIDs within that geohash)
+
 Response: just a confirmation code or error message
 
 Server assembles all exposure records for each datestamp and (optionally, as we scale) shards them by geohash
@@ -20,6 +21,7 @@ If a match is found, the client alerts the user, displays date/time and location
 ## Confirmed Exposure (POST)
 Request:
 - Full BLE Proximity Event UUID(s) (all 128 bits)
+
 Response:
 - Symptoms Record, including reported symptoms + severity, dates, etc.
 
