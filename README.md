@@ -54,5 +54,30 @@ Family Name	GC Policy
 symptoms	<never>
 ```
 
-2. Check that you can write some contacts
-`go test TestBackendSimple`
+2. Check that you can write some contacts with `go test -run TestBackendSimple`
+
+```
+# go test -run TestBackendSimple
+PASS
+ok  	github.com/wolkdb/coepi-backend-go/server	0.522s
+
+# cbt read symptoms
+----------------------------------------
+b93a90a843ed293522aa803781298dac436040fa231a189e52c6994a5d591f09
+  case:symptoms                            @ 2020/03/21-02:03:55.604000
+    "JSONBLOB:severe fever,coughing"
+
+# cbt read contacts
+----------------------------------------
+ax
+  symptoms:2020-03-04                      @ 2020/03/21-02:03:55.750000
+    "\xb9:\x90\xa8C\xed)5\"\xaa\x807\x81)\x8d\xacC`@\xfa#\x1a\x18\x9eRƙJ]Y\x1f\t"
+----------------------------------------
+by
+  symptoms:2020-03-15                      @ 2020/03/21-02:03:55.923000
+    "\xb9:\x90\xa8C\xed)5\"\xaa\x807\x81)\x8d\xacC`@\xfa#\x1a\x18\x9eRƙJ]Y\x1f\t"
+----------------------------------------
+cz
+  symptoms:2020-03-20                      @ 2020/03/21-02:03:55.983000
+    "\xb9:\x90\xa8C\xed)5\"\xaa\x807\x81)\x8d\xacC`@\xfa#\x1a\x18\x9eRƙJ]Y\x1f\t"
+```
