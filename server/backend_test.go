@@ -4,11 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
-)
-
-const (
-	defaultProject  = "us-west1-wlk"
-	defaultInstance = "co-epi"
+	"encoding/json"
 )
 
 func TestBackendSimple(t *testing.T) {
@@ -20,6 +16,8 @@ func TestBackendSimple(t *testing.T) {
 	eas := new(ExposureAndSymptoms)
 	eas.Contacts = []Contact{Contact{UUID: "ax", Date: "2020-03-04"}, Contact{UUID: "by", Date: "2020-03-15"}, Contact{UUID: "cz", Date: "2020-03-20"}}
 	eas.Symptoms = []byte("JSONBLOB:severe fever,coughing")
+	easJSON, err := json.Marshal(eas)
+	fmt.Printf("ExposureAndSymptoms Sample: %s\n", easJSON)
 
 	err = backend.processExposureAndSymptoms(eas)
 	if err != nil {
@@ -28,6 +26,9 @@ func TestBackendSimple(t *testing.T) {
 
 	check1 := new(ExposureCheck)
 	check1.Contacts = []Contact{Contact{UUID: "by", Date: "2020-03-04"}}
+	check1JSON, err := json.Marshal(check1)
+	fmt.Printf("ExposureCheck Sample: %s\n", check1JSON)
+
 	symptoms, err := backend.processExposureCheck(check1)
 	if err != nil {
 		t.Fatalf("processExposureCheck(check1): %s", err)

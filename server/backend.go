@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/sha256"
 	"context"
 	"fmt"
-
+	"strings"
+	"time"
 	"cloud.google.com/go/bigtable"
-	"github.com/wolkdb/cloudstore/wolk/core"
 )
+
 
 // Backend holds a client to connect to the BigTable backend
 type Backend struct {
@@ -54,7 +56,7 @@ func (backend *Backend) processExposureAndSymptoms(payload *ExposureAndSymptoms)
 	// store symptoms in the symptoms table
 	symptoms := payload.Symptoms
 	symptomsTable := backend.client.Open(TableSymptoms)
-	symptomsHash := core.Computehash(symptoms)
+	symptomsHash := Computehash(symptoms)
 	mut := bigtable.NewMutation()
 	mut.Set("case", "symptoms", bigtable.Now(), []byte(symptoms))
 	err = symptomsTable.Apply(context.Background(), fmt.Sprintf("%x", symptomsHash), mut)
@@ -66,7 +68,7 @@ func (backend *Backend) processExposureAndSymptoms(payload *ExposureAndSymptoms)
 	// store the first 64 one cell per observation
 	for _, contact := range payload.Contacts {
 		mut := bigtable.NewMutation()
-		mut.Set("symptoms", contact.Date, bigtable.Now(), symptomsHash)
+		mut.Set("symptoms", contact.Date, bigtable.Now(), []byte(fmt.Sprintf("%x", symptomsHash)))
 		err = contactsTable.Apply(context.Background(), contact.UUID, mut)
 		if err != nil {
 			return err
@@ -89,14 +91,23 @@ func (backend *Backend) processExposureCheck(payload *ExposureCheck) (symptomsLi
 				switch k {
 				case "symptoms":
 					for _, yv := range xv {
-						// TODO: get the date from yv.Column ("symptoms:2020-03-22") and filter it
-						// MATCH DETECTED
-						symptomsHashes = append(symptomsHashes, string(yv.Value))
+						kDate := strings.Split(yv.Column, ":") // symptoms:2020-03-15 => sa[1] = "2020-03-15"
+						if len(kDate) == 2 {
+							layoutISO := "2006-01-02"
+							t, err := time.Parse(layoutISO, kDate[1])
+							if err == nil && time.Since(t) < 24 * 7  * time.Hour {
+								// fmt.Printf("MATCH: %s|%s\n", date, string(yv.Value))
+								// Question: how can we filter on the right number of days without a disease lookup demanding a peek into the symptoms data?
+							}
+							symptomsHashes = append(symptomsHashes, string(yv.Value))
+						} else {
+							fmt.Printf("Problem: %d\n", len(kDate))
+						}
 					}
 				}
 			}
 			return true // Keep going.
-		}, bigtable.RowFilter(bigtable.FamilyFilter("links")))
+		}, bigtable.RowFilter(bigtable.LatestNFilter(1)))
 		if err != nil {
 			// TODO: handle err.
 		}
@@ -119,10 +130,22 @@ func (backend *Backend) processExposureCheck(payload *ExposureCheck) (symptomsLi
 				}
 			}
 			return true // Keep going.
-		}, bigtable.RowFilter(bigtable.FamilyFilter("case")))
+		}, bigtable.RowFilter(bigtable.LatestNFilter(1)))
 		if err != nil {
 			// TODO: handle err.
 		}
 	}
 	return symptomsList, nil
+}
+
+// Computehash returns the hash of its inputs
+func Computehash(data ...[]byte) []byte {
+	hasher := sha256.New()
+	for _, b := range data {
+		_, err := hasher.Write(b)
+		if err != nil {
+			panic(1)
+		}
+	}
+	return hasher.Sum(nil)
 }

@@ -18,20 +18,30 @@ const (
 	sslBaseDir     = "/etc/pki/tls/certs/wildcard"
 	sslKeyFileName = "www.wolk.com.key"
 	caFileName     = "www.wolk.com.bundle"
+
+	defaultPort  uint16 = 8080
+	defaultProject  = "us-west1-wlk"
+	defaultInstance = "co-epi"
 )
 
 // Server manages HTTP connections
 type Server struct {
-	backend  Backend
+	backend  *Backend
 	Handler  http.Handler
 	HTTPPort uint16
 }
 
 // NewServer returns an HTTP Server to handle simple-api-process-flow https://github.com/Co-Epi/data-models/blob/master/simple-api-process-flow.md
-func NewServer(httpPort uint16) (s *Server, err error) {
+func NewServer(httpPort uint16, project, instance string) (s *Server, err error) {
 	s = &Server{
 		HTTPPort: httpPort,
 	}
+	backend, err := NewBackend(project, instance)
+	if err != nil {
+		return s, err
+	}
+	s.backend = backend
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.getConnection)
 	s.Handler = mux
@@ -148,11 +158,15 @@ func (s *Server) Start() (err error) {
 }
 
 func main() {
-	port := uint16(8080)
-	_, err := NewServer(port)
+	
+	port := defaultPort
+	project := defaultProject
+	instance := defaultInstance
+
+	_, err := NewServer(port, project, instance)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("CoEpi Server - Listening on port %d...\n", port)
+	fmt.Printf("CoEpi Go Server - Listening on port %d...\n", port)
 	select {}
 }
