@@ -89,23 +89,35 @@
 						</xs:attribute>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="Subscription" minOccurs="0">
+				<xs:element name="ExposureCheck" minOccurs="0">
 					<xs:annotation>
-						<xs:documentation>A request to subscribe to exposure alerts across a defined time range, encompassing  a particular set of time and location combinations</xs:documentation>
+						<xs:documentation>A request to retrieve new exposure alerts which have been uploaded since the last check; encompassing  a particular set of location combinations</xs:documentation>
 					</xs:annotation>
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="Request" minOccurs="0">
+							<xs:element name="PartialContactEventUUIDs" type="xs:base64Binary" maxOccurs="unbounded">
 								<xs:annotation>
-									<xs:documentation>A single location and time band subscription request</xs:documentation>
+									<xs:documentation>A subset of the Contact Event UUIDs that are randomly assigned to one BLE contact event between two compatiple client phones.  Half or Quarter length (64 or 32 bit) may be supported.</xs:documentation>
 								</xs:annotation>
-								<xs:complexType>
-									<xs:complexContent>
-										<xs:extension base="epi:ApproximateLocationAndTimeType"/>
-									</xs:complexContent>
-								</xs:complexType>
 							</xs:element>
-							<xs:element name="Response" minOccurs="0">
+							<xs:element name="GeoHash" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>A geohash area to limit the check - only BLE contacts that occurred in a listed GeoHash will be returned.  Client's decision how precise to request - from minimum precision up to precision 5</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="LastCheckTimeStamp" type="xs:dateTimeStamp" use="required">
+							<xs:annotation>
+								<xs:documentation>The date &amp; time of the last successful check - to allow the server to only retrieve new exposure records since that time, and prevent clients from needing to re-process data</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="RequestNumber" type="xs:int" use="required"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="PossibleExposure" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Response">
 								<xs:annotation>
 									<xs:documentation>Response from server regarding a subscription request</xs:documentation>
 								</xs:annotation>
@@ -145,15 +157,12 @@
 									</xs:choice>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="ClientBluetoothIDs" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="MatchingContactEventUUIDs" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded">
 								<xs:annotation>
-									<xs:documentation>A hashed hash of all BLE identifiers that belong to the person requesting notifications. Used to minimise the number of exposure records sent to the client, and prevent phishing for data by malicious clients.</xs:documentation>
+									<xs:documentation>All Full length Contact Event UUIDs that are matched the conditions in the Exposure Check - if any qualified</xs:documentation>
 								</xs:annotation>
 							</xs:element>
 						</xs:sequence>
-						<xs:attribute name="StartInterval" type="xs:dateTime" use="required"/>
-						<xs:attribute name="EndInterval" type="xs:dateTime" use="required"/>
-						<xs:attribute name="RequestNumber" type="xs:int" use="required"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="CaseRecord" type="epi:CaseRecordType" minOccurs="0" maxOccurs="unbounded">
