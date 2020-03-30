@@ -1,4 +1,5 @@
-openapi: 3.0.2
+openapi: 3.0.3
+
 info:
   description: This is the API model for CoEpi Server
   version: 0.2.0
@@ -29,6 +30,7 @@ paths:
                   description: Unique Identifier of the infection report
                 report:
                   type: string
+                  format: byte # base64 encoded data
                   description: Content of the infection report. Example, symptoms
                 cenKeys:
                   type: array
@@ -36,9 +38,12 @@ paths:
                     $ref: '#/components/schemas/CenKey'
                   minItems: 1
                   maxItems: 10 # TODO: Discuss appropriate value
-                  uniqueItems: true 
+                  uniqueItems: true
+              example: 
+                reportId: 1
+                name: "c2V2ZXJlIGZldmVyLGNvdWdoaW5nLGhhcmQgdG8gYnJlYXRoZQ=="
+                cenKeys: [ "2cb87ba2f39a3119e4096cc6e04e68a8","4bb5c242916d923fe3565bd5c6b09dd3" ]
               required:
-                - reportId
                 - report
                 - cenKeys
                 
@@ -63,10 +68,10 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/CenKey'
-      
+        example: "6d68785abd6f99ea646fd7c775a14a36f7cec7635a76d3b5554908c6c3a09af5"
       responses:
         '200':
-          description: OK
+          description: List of infection/symptom reports associated with the specified CEN Key
           content:
             application/json:
               schema:
@@ -93,16 +98,17 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/Timestamp'
-          
+        example: 1585326048
       responses:
         '200':
-          description: OK
+          description: A list of CEN keys for the timestamp range specified in the parameter
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/CenKey'
+                example: ["67f48de38f35c231e34e533649ecbfeb","b85c4b373adde4c66651ba63aef40f48"]
         '400':
           description: Request Parameter Invalid # TBD
         '500':
@@ -111,7 +117,7 @@ paths:
           description: Unexpected Error
                 
         
-# https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#referenceObject          
+# https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
 components:
   schemas:
     CenKey:
@@ -119,10 +125,17 @@ components:
       type: string
       minLength: 5 #TODO: Discuss appropriate value
       maxLength: 100 #TODO: Discuss appropriate value and also a possibly an expected pattern
-    
+      example: "67f48de38f35c231e34e533649ecbfeb"
+      
+    Timestamp:
+      type: integer
+      description: Timestamp in unix epoch format. It is the number of seconds that have elapsed since the Unix epoch, that is the time 00:00:00 UTC on 1 January 1970, minus leap seconds.
+      minimum: 0
+      example: 1585551684
+
     Report:
-      description: Infection report representing symptoms and/or positive infection incident
       type: object
+      description: Infection report representing symptoms and/or positive infection incident
       properties:
         reportId:
           type: string
@@ -131,14 +144,14 @@ components:
           maxLength: 100 #TODO: Discuss appropriate value and also a possibly an expected pattern (guid ?)
         report:
           type: string
-          description: Content of the infection report consisting of symptoms and/or positive infection incident
+          description: Content of the infection report consisting of symptoms and/or positive infection incident. Base64 encoded
+          format: byte # base64 excoded data
           minLength: 1
           maxLength: 10000
-        timestamp:
+        reportTimestamp:
           $ref: '#/components/schemas/Timestamp'
-      
-    Timestamp:
-      type: integer
-      description: Timestamp in unix epoch format. It is the number of seconds that have elapsed since the Unix epoch, that is the time 00:00:00 UTC on 1 January 1970, minus leap seconds.
-      minimum: 0
+      example:
+        reportId: "6d68785abd6f99ea646fd7c775a14a36f7cec7635a76d3b5554908c6c3a09af5"
+        report: "c2V2ZXJlIGZldmVyLGNvdWdoaW5nLGhhcmQgdG8gYnJlYXRoZQ=="
+        reportTimestamp: 1585326048
   
