@@ -37,7 +37,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/CenKey'
                   minItems: 1
-                  maxItems: 10 # TODO: Discuss appropriate value
+                  maxItems: 50000 # TODO: Discuss appropriate value
                   uniqueItems: true
               example: 
                 reportId: 1
@@ -145,7 +145,7 @@ components:
         report:
           type: string
           description: Content of the infection report consisting of symptoms and/or positive infection incident. Base64 encoded
-          format: byte # base64 excoded data
+          format: byte # base64 encoded data
           minLength: 1
           maxLength: 10000
         reportTimestamp:
