@@ -2,14 +2,14 @@ openapi: 3.0.3
 
 info:
   description: This is the API model for CoEpi Server
-  version: 1.0.0
+  version: 0.3.0
   title: CoEpi Server
   license:
     name: MIT License
     url: https://github.com/Co-Epi/data-models/blob/master/LICENSE
     
 servers:
-  - url: https://api.example.com/v1 #TODO: Update once the server is set up and deployed
+  - url: https://api.example.com/v3 #TODO: Update once the server is set up and deployed
     description: URL Endpoint used for dev/test
     
 paths:
@@ -54,17 +54,24 @@ paths:
           description: Unexpected Error
   
   
-  /cenreport/{timestamp}:
+  /cenreport/{timestampLower}/{timestampUpper}:
     get:
-      summary: Returns a list of reports generated during the hour of the specified timestamp in UTC
+      summary: Returns a list of reports generated between a timestamp range
       parameters:
       - in: path
-        name: timestamp
-        description: Timestamp for which we need the reports. All the reports that were generated in the specified hour of the timestamp will be retrieved.
+        name: timestampLower
+        description: Lower limit timestamp in UTC for which we need the reports
         required: true
         schema:
           $ref: '#/components/schemas/Timestamp'
         example: 1585326048
+      - in: path
+        name: timestampUpper
+        description: Upper limit timestamp in UTC for which we need the reports. If not specified, default is the current timestamp
+        required: true
+        schema:
+          $ref: '#/components/schemas/Timestamp'
+        example: 1585327048
       responses:
         '200':
           description: List of infection/symptom reports generated during the hour of the specified timestamp
