@@ -1,0 +1,3 @@
+## CoEpi API definition
+
+This directory consists of CoEpi API model definitions in [Open API specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md). Each definition file describes the specific version of the API in format ***coepi_<version>.yml***. The model definition can be used to test the API calls or edit the models using [swagger editor](http://editor.swagger.io/). It can also be used to auto-generate client and server SDKs.
